@@ -1,29 +1,50 @@
 var { buildSchema } = require('graphql');
 
 const books = [{
+    id:1,
     name: 'Eragon',
-    author: 'Christopher Paolini'
+    author: 1
+}];
+
+const authors = [{
+    id:101,
+    author: 'Cristopher Paolini'
 }]
  
 var schema = buildSchema(`
+
+ type Author{
+     id: Int
+     author: String
+ }
+
   type Book{
+    id: Int
     name: String
-    author: String
+    author: Author
   }
 
   type Query {
+    getAuthor(id:Int): Author
+    getBook: Book
     getBooks: [Book]
   }
 
   type Mutation {
-      addBook(name:String,author:String): Book
+      addBook(name:String,author:Int): Book
   }
 `);
  
 var resolvers = { 
     //Query
-    getBooks: async () => {
-        return await books;
+    getAuthor:(parent,args)=>{
+        return authors.filter(val=>val.id==parent.id);
+    },
+    getBook: (args)=>{
+        return books.filter(val=> val.id==args.id);
+    },
+    getBooks: () => {
+        return books;
     },
     // Mutation
     addBook: async (args)=>{
