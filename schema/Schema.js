@@ -3,7 +3,7 @@ var { buildSchema } = require('graphql');
 const books = [{
     id:1,
     name: 'Eragon',
-    author: 1
+    author: 101
 }];
 
 const authors = [{
