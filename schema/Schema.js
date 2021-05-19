@@ -1,4 +1,4 @@
-var { buildSchema } = require('graphql');
+const { gql } = require('apollo-server');
 
 const books = [{
     id:1,
@@ -8,14 +8,14 @@ const books = [{
 
 const authors = [{
     id:101,
-    author: 'Cristopher Paolini'
+    name: 'Cristopher Paolini'
 }]
  
-var schema = buildSchema(`
+var typeDefs =gql`
 
  type Author{
      id: Int
-     author: String
+     name: String
  }
 
   type Book{
@@ -25,36 +25,48 @@ var schema = buildSchema(`
   }
 
   type Query {
-    getAuthor(id:Int): Author
-    getBook: Book
-    getBooks: [Book]
+    books: [Book]
   }
 
   type Mutation {
       addBook(name:String,author:Int): Book
   }
-`);
+
+  schema {
+    query: Query
+    mutation: Mutation
+  }
+`;
  
 var resolvers = { 
-    //Query
-    getAuthor:(parent,args)=>{
-        return authors.filter(val=>val.id==parent.id);
+    Book: {
+        author: (parent)=>{
+            console.log('-->parent',parent)
+            const author = authors.filter(val=>{
+                return val.id === parent.author;
+           });
+           if(!author.length){
+                return;
+           }
+           console.log('author',author);
+           return author[0];
+        }
     },
-    getBook: (args)=>{
-        return books.filter(val=> val.id==args.id);
+    Query: {
+        books: () => {
+            return books;
+        },
     },
-    getBooks: () => {
-        return books;
-    },
-    // Mutation
-    addBook: async (args)=>{
-        console.log('add book args',args)
-        books.push(args);
-        return args;
+    Mutation: {
+        addBook: async (args)=>{
+            books.push(args);
+            return args;
+        },
     }
+   
 };
 
 module.exports = {
-    schema,
+    typeDefs,
     resolvers
 }
